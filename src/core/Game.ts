@@ -14,7 +14,7 @@ import { AudioManager } from './AudioManager';
 import { HUD } from '../ui/HUD';
 import { MenuScreen } from '../ui/MenuScreen';
 import { GameOverScreen } from '../ui/GameOverScreen';
-import { POWERUP, COLORS } from '../utils/constants';
+import { POWERUP, COLORS, SCENE } from '../utils/constants';
 
 export enum GameState {
   MENU = 'menu',
@@ -78,11 +78,21 @@ export class Game {
       this.scoreSystem.addKillScore(scoreValue);
       this.particleSystem.explosion(position, COLORS.ASTEROID_BASE);
       this.audio.explosion();
+      // Small shake for nearby asteroid explosions
+      const dist = position.distanceTo(this.player.position);
+      if (dist < 20) {
+        this.scene.triggerShake(SCENE.SCREEN_SHAKE_INTENSITY * 0.3 * (1 - dist / 20));
+      }
     };
     this.collisionSystem.onEnemyDestroyed = (scoreValue, position) => {
       this.scoreSystem.addKillScore(scoreValue);
       this.particleSystem.explosion(position, COLORS.ENEMY_HULL, 40);
       this.audio.explosion();
+      // Medium shake for enemy explosions
+      const dist = position.distanceTo(this.player.position);
+      if (dist < 30) {
+        this.scene.triggerShake(SCENE.SCREEN_SHAKE_INTENSITY * 0.5 * (1 - dist / 30));
+      }
     };
     this.collisionSystem.onPowerUpCollected = (type, position) => {
       this.applyPowerUp(type);
@@ -97,6 +107,8 @@ export class Game {
     this.collisionSystem.onPlayerHit = (position) => {
       this.particleSystem.explosion(position, COLORS.EXPLOSION, 15);
       this.audio.hit();
+      this.scene.triggerShake(SCENE.SCREEN_SHAKE_INTENSITY);
+      this.scene.triggerHitFlash(0.6);
     };
     this.collisionSystem.onProjectileImpact = (position, color) => {
       this.particleSystem.impact(position, color);
@@ -277,7 +289,14 @@ export class Game {
     // Particle system
     this.particleSystem.update(delta);
 
+    // Smooth camera tracking (follows player Y slightly)
+    this.scene.setCameraTrackY(this.player.position.y);
+
     if (!this.player.isAlive) {
+      // Big death explosion effect
+      this.scene.triggerShake(SCENE.SCREEN_SHAKE_INTENSITY * 2.5);
+      this.scene.triggerHitFlash(1.0);
+      this.particleSystem.explosion(this.player.position.clone(), COLORS.PLAYER_ENGINE, 60);
       this.gameOver();
     }
   }
