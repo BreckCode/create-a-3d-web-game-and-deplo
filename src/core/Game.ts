@@ -3,9 +3,11 @@ import { Player } from '../entities/Player';
 import { ProjectilePool } from '../entities/Projectile';
 import { AsteroidPool } from '../entities/Asteroid';
 import { EnemyPool } from '../entities/Enemy';
+import { PowerUpPool } from '../entities/PowerUp';
 import { SpawnSystem } from '../systems/SpawnSystem';
 import { CollisionSystem } from '../systems/CollisionSystem';
 import { Scene } from './Scene';
+import { POWERUP } from '../utils/constants';
 
 export enum GameState {
   MENU = 'menu',
@@ -21,8 +23,13 @@ export class Game {
   public projectiles: ProjectilePool;
   public asteroids: AsteroidPool;
   public enemies: EnemyPool;
+  public powerUps: PowerUpPool;
   public spawnSystem: SpawnSystem;
   public collisionSystem: CollisionSystem;
+
+  // Power-up effect timers
+  private shieldTimer = 0;
+  private rapidFireTimer = 0;
   public state: GameState = GameState.MENU;
   public score = 0;
   public highScore = 0;
@@ -40,15 +47,21 @@ export class Game {
     this.projectiles = new ProjectilePool(this.scene.scene);
     this.asteroids = new AsteroidPool(this.scene.scene);
     this.enemies = new EnemyPool(this.scene.scene, this.projectiles);
+    this.powerUps = new PowerUpPool(this.scene.scene);
     this.spawnSystem = new SpawnSystem(this.asteroids);
     this.spawnSystem.setEnemyPool(this.enemies);
+    this.spawnSystem.setPowerUpPool(this.powerUps);
     this.collisionSystem = new CollisionSystem(this.player, this.projectiles, this.asteroids);
     this.collisionSystem.setEnemyPool(this.enemies);
+    this.collisionSystem.setPowerUpPool(this.powerUps);
     this.collisionSystem.onAsteroidDestroyed = (scoreValue) => {
       this.score += scoreValue;
     };
     this.collisionSystem.onEnemyDestroyed = (scoreValue) => {
       this.score += scoreValue;
+    };
+    this.collisionSystem.onPowerUpCollected = (type) => {
+      this.applyPowerUp(type);
     };
     this.highScore = this.loadHighScore();
   }
@@ -98,7 +111,10 @@ export class Game {
     this.projectiles.reset();
     this.asteroids.reset();
     this.enemies.reset();
+    this.powerUps.reset();
     this.spawnSystem.reset();
+    this.shieldTimer = 0;
+    this.rapidFireTimer = 0;
     this.start();
   }
 
@@ -138,12 +154,49 @@ export class Game {
 
     this.asteroids.update(delta);
     this.enemies.update(delta, this.player.position);
+    this.powerUps.update(delta);
+
+    // Power-up effect timers
+    this.updatePowerUpTimers(delta);
 
     // Collision detection
     this.collisionSystem.update();
 
     if (!this.player.isAlive) {
       this.gameOver();
+    }
+  }
+
+  private applyPowerUp(type: string): void {
+    switch (type) {
+      case 'SHIELD':
+        this.player.hasShield = true;
+        this.shieldTimer = POWERUP.TYPES.SHIELD.duration;
+        break;
+      case 'RAPID_FIRE':
+        this.player.hasRapidFire = true;
+        this.rapidFireTimer = POWERUP.TYPES.RAPID_FIRE.duration;
+        break;
+      case 'HEALTH':
+        this.player.heal(POWERUP.TYPES.HEALTH.amount);
+        break;
+    }
+  }
+
+  private updatePowerUpTimers(delta: number): void {
+    if (this.shieldTimer > 0) {
+      this.shieldTimer -= delta;
+      if (this.shieldTimer <= 0) {
+        this.player.hasShield = false;
+        this.shieldTimer = 0;
+      }
+    }
+    if (this.rapidFireTimer > 0) {
+      this.rapidFireTimer -= delta;
+      if (this.rapidFireTimer <= 0) {
+        this.player.hasRapidFire = false;
+        this.rapidFireTimer = 0;
+      }
     }
   }
 
@@ -170,6 +223,7 @@ export class Game {
     this.projectiles.dispose();
     this.asteroids.dispose();
     this.enemies.dispose();
+    this.powerUps.dispose();
     this.input.dispose();
     this.scene.dispose();
   }
