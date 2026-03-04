@@ -11,7 +11,7 @@
 - [x] 9. Enemy ships with AI | Create enemy entities with procedural models, basic AI (fly toward player, strafe, shoot), health, and death behavior | files: src/entities/Enemy.ts
 - [x] 10. Power-up system | Implement collectible power-ups (shield, rapid fire, health restore) with visual indicators, timed effects, and pickup behavior | files: src/entities/PowerUp.ts
 - [x] 11. Particle effects system | Create particle system for explosions (asteroid/enemy destruction), engine trails (player/enemies), projectile impacts, and power-up collection effects | files: src/systems/ParticleSystem.ts
-- [ ] 12. Score and progression system | Build score tracking with combo multipliers, difficulty progression curves, and localStorage high score persistence | files: src/systems/ScoreSystem.ts
+- [x] 12. Score and progression system | Build score tracking with combo multipliers, difficulty progression curves, and localStorage high score persistence | files: src/systems/ScoreSystem.ts
 - [ ] 13. Space environment | Create the background environment with starfield (particle system), scrolling nebula colors, ambient lighting, and depth fog | files: src/core/Scene.ts, src/core/AssetManager.ts
 - [ ] 14. HUD overlay | Build the in-game heads-up display showing health bar, score, high score, active power-ups, and combo multiplier using HTML/CSS overlay | files: src/ui/HUD.ts, src/styles/main.css
 - [ ] 15. Menu and game over screens | Create the title/start screen with game name and controls info, and game over screen with final score, high score, and restart button | files: src/ui/MenuScreen.ts, src/ui/GameOverScreen.ts, src/styles/main.css

@@ -8,6 +8,7 @@ import { PowerUpPool } from '../entities/PowerUp';
 import { SpawnSystem } from '../systems/SpawnSystem';
 import { CollisionSystem } from '../systems/CollisionSystem';
 import { ParticleSystem } from '../systems/ParticleSystem';
+import { ScoreSystem } from '../systems/ScoreSystem';
 import { Scene } from './Scene';
 import { POWERUP, COLORS } from '../utils/constants';
 
@@ -29,14 +30,17 @@ export class Game {
   public spawnSystem: SpawnSystem;
   public collisionSystem: CollisionSystem;
   public particleSystem: ParticleSystem;
+  public scoreSystem: ScoreSystem;
 
   // Power-up effect timers
   private shieldTimer = 0;
   private rapidFireTimer = 0;
   public state: GameState = GameState.MENU;
-  public score = 0;
-  public highScore = 0;
   public elapsed = 0;
+
+  /** Convenience accessors so external code (HUD, menus) can read score/highScore */
+  public get score(): number { return this.scoreSystem.score; }
+  public get highScore(): number { return this.scoreSystem.highScore; }
 
   private lastTime = 0;
   private animationFrameId = 0;
@@ -58,12 +62,13 @@ export class Game {
     this.collisionSystem = new CollisionSystem(this.player, this.projectiles, this.asteroids);
     this.collisionSystem.setEnemyPool(this.enemies);
     this.collisionSystem.setPowerUpPool(this.powerUps);
+    this.scoreSystem = new ScoreSystem();
     this.collisionSystem.onAsteroidDestroyed = (scoreValue, position) => {
-      this.score += scoreValue;
+      this.scoreSystem.addKillScore(scoreValue);
       this.particleSystem.explosion(position, COLORS.ASTEROID_BASE);
     };
     this.collisionSystem.onEnemyDestroyed = (scoreValue, position) => {
-      this.score += scoreValue;
+      this.scoreSystem.addKillScore(scoreValue);
       this.particleSystem.explosion(position, COLORS.ENEMY_HULL, 40);
     };
     this.collisionSystem.onPowerUpCollected = (type, position) => {
@@ -81,14 +86,13 @@ export class Game {
     this.collisionSystem.onProjectileImpact = (position, color) => {
       this.particleSystem.impact(position, color);
     };
-    this.highScore = this.loadHighScore();
   }
 
   public start(): void {
     if (this.running) return;
     this.running = true;
     this.state = GameState.PLAYING;
-    this.score = 0;
+    this.scoreSystem.reset();
     this.elapsed = 0;
     this.lastTime = performance.now();
     this.loop(this.lastTime);
@@ -117,10 +121,7 @@ export class Game {
 
   public gameOver(): void {
     this.state = GameState.GAME_OVER;
-    if (this.score > this.highScore) {
-      this.highScore = this.score;
-      this.saveHighScore(this.highScore);
-    }
+    this.scoreSystem.finalizeScore();
   }
 
   public restart(): void {
@@ -174,6 +175,9 @@ export class Game {
     this.asteroids.update(delta);
     this.enemies.update(delta, this.player.position);
     this.powerUps.update(delta);
+
+    // Score system (combos, survival points, difficulty)
+    this.scoreSystem.update(delta, this.elapsed);
 
     // Power-up effect timers
     this.updatePowerUpTimers(delta);
@@ -229,23 +233,6 @@ export class Game {
         this.player.hasRapidFire = false;
         this.rapidFireTimer = 0;
       }
-    }
-  }
-
-  private loadHighScore(): number {
-    try {
-      const saved = localStorage.getItem('space-survival-highscore');
-      return saved ? parseInt(saved, 10) : 0;
-    } catch {
-      return 0;
-    }
-  }
-
-  private saveHighScore(score: number): void {
-    try {
-      localStorage.setItem('space-survival-highscore', String(score));
-    } catch {
-      // localStorage unavailable
     }
   }
 
