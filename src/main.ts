@@ -18,8 +18,8 @@ function init(): void {
 
   game = new Game(container);
 
-  // Start the game loop (renders even in menu state)
-  game.start();
+  // Start the render loop (game stays in MENU state until player clicks Start)
+  game.startLoop();
 
   // Handle visibility changes - pause when tab is hidden
   document.addEventListener('visibilitychange', () => {

@@ -11,6 +11,8 @@ import { ParticleSystem } from '../systems/ParticleSystem';
 import { ScoreSystem } from '../systems/ScoreSystem';
 import { Scene } from './Scene';
 import { HUD } from '../ui/HUD';
+import { MenuScreen } from '../ui/MenuScreen';
+import { GameOverScreen } from '../ui/GameOverScreen';
 import { POWERUP, COLORS } from '../utils/constants';
 
 export enum GameState {
@@ -33,6 +35,8 @@ export class Game {
   public particleSystem: ParticleSystem;
   public scoreSystem: ScoreSystem;
   public hud: HUD;
+  public menuScreen: MenuScreen;
+  public gameOverScreen: GameOverScreen;
 
   // Power-up effect timers
   public shieldTimer = 0;
@@ -89,16 +93,24 @@ export class Game {
       this.particleSystem.impact(position, color);
     };
     this.hud = new HUD(this);
+    this.menuScreen = new MenuScreen(this);
+    this.gameOverScreen = new GameOverScreen(this);
   }
 
-  public start(): void {
+  /** Start the render loop (does NOT change game state). */
+  public startLoop(): void {
     if (this.running) return;
     this.running = true;
+    this.lastTime = performance.now();
+    this.loop(this.lastTime);
+  }
+
+  /** Begin a new game session (MENU → PLAYING). */
+  public start(): void {
     this.state = GameState.PLAYING;
     this.scoreSystem.reset();
     this.elapsed = 0;
-    this.lastTime = performance.now();
-    this.loop(this.lastTime);
+    if (!this.running) this.startLoop();
   }
 
   public stop(): void {
@@ -157,6 +169,8 @@ export class Game {
     this.scene.update(delta);
     this.scene.render();
     this.hud.update();
+    this.menuScreen.update();
+    this.gameOverScreen.update();
     this.input.update();
   };
 
@@ -251,6 +265,8 @@ export class Game {
     this.powerUps.dispose();
     this.particleSystem.dispose();
     this.hud.dispose();
+    this.menuScreen.dispose();
+    this.gameOverScreen.dispose();
     this.input.dispose();
     this.scene.dispose();
   }
