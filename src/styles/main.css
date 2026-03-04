@@ -1,3 +1,86 @@
+/* ── Loading Screen ──────────────────────────────────────── */
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #000011;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  color: #ffffff;
+  user-select: none;
+  transition: opacity 0.5s ease;
+}
+
+#loading-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-title {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  margin-bottom: 32px;
+  color: #88bbff;
+  text-shadow: 0 0 20px rgba(68, 136, 255, 0.6);
+}
+
+.loading-bar-container {
+  width: 240px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loading-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #4488ff, #88bbff);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(68, 136, 255, 0.5);
+}
+
+.loading-text {
+  margin-top: 16px;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Global base styles ──────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #000011;
+  width: 100%;
+  height: 100%;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+#app canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* ── HUD Overlay ─────────────────────────────────────────── */
 #hud {
   position: fixed;
@@ -472,4 +555,191 @@
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* ── Responsive: tablets and small desktops ──────────────── */
+@media (max-width: 768px) {
+  .hud-top {
+    padding: 12px 16px;
+  }
+
+  .hud-score {
+    font-size: 20px;
+  }
+
+  .hud-highscore {
+    font-size: 12px;
+  }
+
+  .hud-combo {
+    font-size: 18px;
+    top: 12px;
+  }
+
+  .hud-health {
+    bottom: 16px;
+    left: 16px;
+  }
+
+  .hud-health-bar {
+    width: 140px;
+    height: 10px;
+  }
+
+  .hud-health-label {
+    font-size: 10px;
+  }
+
+  .hud-powerups {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .hud-powerup-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+
+  .menu-title {
+    font-size: 36px;
+    letter-spacing: 4px;
+  }
+
+  .menu-title span {
+    font-size: 28px;
+    letter-spacing: 6px;
+  }
+
+  .menu-content {
+    padding: 24px 16px;
+    max-width: 90vw;
+  }
+
+  .menu-start-btn,
+  .gameover-restart-btn,
+  .pause-resume-btn {
+    padding: 12px 32px;
+    font-size: 16px;
+  }
+
+  .gameover-title {
+    font-size: 36px;
+  }
+
+  .gameover-score {
+    font-size: 36px;
+  }
+
+  .gameover-content {
+    padding: 24px 16px;
+    max-width: 90vw;
+  }
+
+  .pause-title {
+    font-size: 36px;
+  }
+
+  .menu-controls {
+    padding: 12px 16px;
+  }
+
+  .menu-control-row {
+    font-size: 12px;
+  }
+}
+
+/* ── Responsive: small phones ────────────────────────────── */
+@media (max-width: 480px) {
+  .hud-top {
+    padding: 8px 10px;
+  }
+
+  .hud-score {
+    font-size: 16px;
+  }
+
+  .hud-combo {
+    font-size: 14px;
+    top: 8px;
+  }
+
+  .hud-health {
+    bottom: 10px;
+    left: 10px;
+  }
+
+  .hud-health-bar {
+    width: 100px;
+    height: 8px;
+  }
+
+  .hud-powerups {
+    bottom: 10px;
+    right: 10px;
+    gap: 6px;
+  }
+
+  .hud-powerup-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
+  .menu-title {
+    font-size: 28px;
+    letter-spacing: 3px;
+  }
+
+  .menu-title span {
+    font-size: 22px;
+    letter-spacing: 4px;
+  }
+
+  .menu-subtitle {
+    font-size: 12px;
+    margin-bottom: 24px;
+  }
+
+  .gameover-title {
+    font-size: 28px;
+  }
+
+  .gameover-score {
+    font-size: 28px;
+  }
+
+  .pause-title {
+    font-size: 28px;
+  }
+
+  .loading-title {
+    font-size: 24px;
+    letter-spacing: 4px;
+  }
+
+  .loading-bar-container {
+    width: 180px;
+  }
+
+  .loading-text {
+    font-size: 10px;
+  }
+}
+
+/* ── Responsive height: short viewports ──────────────────── */
+@media (max-height: 500px) {
+  .menu-controls {
+    display: none;
+  }
+
+  .menu-subtitle {
+    margin-bottom: 20px;
+  }
+
+  .gameover-title,
+  .pause-title {
+    margin-bottom: 20px;
+  }
 }

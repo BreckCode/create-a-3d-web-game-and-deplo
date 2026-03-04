@@ -37,10 +37,13 @@ export class Scene {
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.FogExp2(0x000011, 0.0008);
 
+    const width = container.clientWidth || window.innerWidth;
+    const height = container.clientHeight || window.innerHeight;
+
     // Camera - positioned behind and above the play area, looking forward
     this.camera = new THREE.PerspectiveCamera(
       75,
-      window.innerWidth / window.innerHeight,
+      width / height,
       0.1,
       2000
     );
@@ -52,7 +55,7 @@ export class Scene {
       antialias: true,
       alpha: false,
     });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setClearColor(0x000011);
     this.renderer.shadowMap.enabled = false;
@@ -67,7 +70,7 @@ export class Scene {
     this.composer.addPass(renderPass);
 
     this.bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      new THREE.Vector2(width, height),
       0.6,   // strength
       0.4,   // radius
       0.85,  // threshold
@@ -118,12 +121,13 @@ export class Scene {
   }
 
   private onResize = (): void => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = this.container.clientWidth || window.innerWidth;
+    const height = this.container.clientHeight || window.innerHeight;
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.composer.setSize(width, height);
     this.bloomPass.resolution.set(width, height);
   };

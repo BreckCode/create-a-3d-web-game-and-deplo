@@ -19,5 +19,5 @@
 - [x] 17. Game state management | Wire up complete game flow: menu → playing → game over → restart, including pause functionality and state transitions | files: src/core/Game.ts
 - [x] 18. Visual polish and effects | Add post-processing bloom/glow effects, screen shake on damage, flash effects on hits, smooth camera movements, and overall visual refinement | files: src/core/Scene.ts, src/core/Game.ts
 - [x] 19. Performance optimization | Implement object pooling for all entities, frustum culling, efficient particle recycling, and ensure stable 60fps | files: src/core/Game.ts, src/entities/Projectile.ts, src/systems/ParticleSystem.ts
-- [ ] 20. Responsive design and cross-browser | Ensure canvas resizes properly, UI scales on different screen sizes, handle window focus/blur, and add loading state | files: src/main.ts, src/styles/main.css, src/core/Scene.ts
+- [x] 20. Responsive design and cross-browser | Ensure canvas resizes properly, UI scales on different screen sizes, handle window focus/blur, and add loading state | files: src/main.ts, src/styles/main.css, src/core/Scene.ts
 - [ ] 21. Build, deploy to Netlify, and verify | Run production build, deploy to Netlify via CLI, verify the live URL works correctly | files: netlify.toml, package.json
