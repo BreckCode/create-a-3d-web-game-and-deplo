@@ -52,3 +52,4 @@ Status: Planning Complete
   - `src/core/InputManager.test.ts` (15 tests): Keyboard state tracking, justPressed detection, WASD/arrow movement accessors, mouse input, per-frame reset, dispose cleanup
   - All 91 tests PASS. No application code changes needed.
 - [3/4/2026, 2:56:00 PM] Task 22 done: Testing setup and test suite
+- [DONE] Task 23: Documentation - Created README.md with project description, installation steps, run commands, gameplay controls, power-up reference table, project structure overview, tech stack, and environment variable notes. No .env file needed (all assets are procedural).
