@@ -1,9 +1,11 @@
 import * as THREE from 'three';
+import { AssetManager } from './AssetManager';
 
 export class Scene {
   public scene: THREE.Scene;
   public camera: THREE.PerspectiveCamera;
   public renderer: THREE.WebGLRenderer;
+  public environment: AssetManager;
 
   private container: HTMLElement;
 
@@ -40,6 +42,10 @@ export class Scene {
     // Lighting
     this.setupLighting();
 
+    // Space environment (starfield, nebulae)
+    this.environment = new AssetManager();
+    this.scene.add(this.environment.group);
+
     // Handle resize
     window.addEventListener('resize', this.onResize);
   }
@@ -74,6 +80,11 @@ export class Scene {
     this.renderer.setSize(width, height);
   };
 
+  /** Update animated environment elements */
+  public update(delta: number): void {
+    this.environment.update(delta);
+  }
+
   public render(): void {
     this.renderer.render(this.scene, this.camera);
   }
@@ -88,6 +99,7 @@ export class Scene {
 
   public dispose(): void {
     window.removeEventListener('resize', this.onResize);
+    this.environment.dispose();
     this.renderer.dispose();
     this.container.removeChild(this.renderer.domElement);
   }

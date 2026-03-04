@@ -150,6 +150,8 @@ export class Game {
       this.update(delta);
     }
 
+    // Always update environment (starfield animation even when paused/menu)
+    this.scene.update(delta);
     this.scene.render();
     this.input.update();
   };
