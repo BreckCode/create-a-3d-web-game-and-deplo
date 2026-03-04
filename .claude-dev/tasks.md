@@ -3,7 +3,7 @@
 - [x] 1. Core game engine setup | Create the Game class with game loop (requestAnimationFrame), Scene class with Three.js renderer/camera/lighting, and main.ts entry point that bootstraps everything | files: src/main.ts, src/core/Game.ts, src/core/Scene.ts
 - [x] 2. Input management system | Build InputManager to track keyboard state (WASD/arrows/space) and mouse position/movement with pointer lock support | files: src/core/InputManager.ts
 - [x] 3. Game constants and math utilities | Define all game configuration (speeds, spawn rates, sizes, colors) and math helpers (random range, vector utils, lerp) | files: src/utils/constants.ts, src/utils/math.ts
-- [ ] 4. Player ship entity | Create the player spaceship with procedural 3D model (combined geometries), movement controls, rotation toward mouse, boundary clamping, and health system | files: src/entities/Player.ts
+- [x] 4. Player ship entity | Create the player spaceship with procedural 3D model (combined geometries), movement controls, rotation toward mouse, boundary clamping, and health system | files: src/entities/Player.ts
 - [ ] 5. Projectile system | Implement projectile entity with object pooling, firing mechanics from player (spacebar/click), projectile movement, and lifetime management | files: src/entities/Projectile.ts
 - [ ] 6. Asteroid field | Create asteroid entities with procedural geometry (noisy icosahedrons), varied sizes/speeds, rotation, and scrolling toward player | files: src/entities/Asteroid.ts
 - [ ] 7. Spawn system | Build the spawner that manages asteroid waves, enemy waves, and power-up drops with progressive difficulty scaling over time | files: src/systems/SpawnSystem.ts
