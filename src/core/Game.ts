@@ -1,3 +1,4 @@
+import { InputManager } from './InputManager';
 import { Scene } from './Scene';
 
 export enum GameState {
@@ -9,6 +10,7 @@ export enum GameState {
 
 export class Game {
   public scene: Scene;
+  public input: InputManager;
   public state: GameState = GameState.MENU;
   public score = 0;
   public highScore = 0;
@@ -20,6 +22,7 @@ export class Game {
 
   constructor(container: HTMLElement) {
     this.scene = new Scene(container);
+    this.input = new InputManager(this.scene.renderer.domElement);
     this.highScore = this.loadHighScore();
   }
 
@@ -80,6 +83,7 @@ export class Game {
     }
 
     this.scene.render();
+    this.input.update();
   };
 
   private update(_delta: number): void {
@@ -105,6 +109,7 @@ export class Game {
 
   public dispose(): void {
     this.stop();
+    this.input.dispose();
     this.scene.dispose();
   }
 }
