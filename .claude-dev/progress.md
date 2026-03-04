@@ -44,3 +44,11 @@ Status: Planning Complete
 - [DONE] Task 20: Responsive design and cross-browser - Added loading screen with animated progress bar and fade-out transition. Added global base styles (box-sizing, html/body/canvas reset) for consistent rendering. Scene.ts now uses container dimensions instead of window dimensions for proper sizing, and updates pixelRatio on resize. main.ts handles window blur (alt-tab pauses game) and visibility change (tab hidden pauses game, but doesn't auto-resume to let user click resume). Added responsive CSS media queries for tablets (768px), phones (480px), and short viewports (500px height) that scale HUD elements, menu/game-over text, buttons, health bar, power-up icons, and controls info. TypeScript compiles clean and build succeeds.
 - [3/4/2026, 2:41:54 PM] Task 20 done: Responsive design and cross-browser
 - [3/4/2026, 2:49:32 PM] Task 21 done: Build, deploy to Netlify, and verify
+- [DONE] Task 22: Testing setup and test suite - Set up Vitest with jsdom environment. Wrote 91 tests across 5 test files:
+  - `src/utils/math.test.ts` (36 tests): Unit tests for all math utilities (randomRange, randomInt, lerp, clamp, damp, remap, distance, distanceSq, spheresOverlap, randomOnSphere, randomDirection, randomSpawnPosition, deg2rad, rad2deg, randomElement, easing functions, displaceVertex)
+  - `src/systems/ScoreSystem.test.ts` (16 tests): Score tracking, combo multiplier buildup/decay/cap, survival points, difficulty progression, high score persistence via localStorage, reset behavior
+  - `src/systems/SpawnSystem.test.ts` (12 tests): Asteroid/enemy/power-up spawning, spawn intervals, difficulty scaling, enemy spawn threshold, reset
+  - `src/systems/CollisionSystem.test.ts` (12 tests): Integration tests for all collision pairs (projectile-asteroid, player-asteroid, enemy-projectile-player, player-enemy, projectile-enemy, player-powerup), callback firing, inactive/dead entity skipping
+  - `src/core/InputManager.test.ts` (15 tests): Keyboard state tracking, justPressed detection, WASD/arrow movement accessors, mouse input, per-frame reset, dispose cleanup
+  - All 91 tests PASS. No application code changes needed.
+- [3/4/2026, 2:56:00 PM] Task 22 done: Testing setup and test suite
