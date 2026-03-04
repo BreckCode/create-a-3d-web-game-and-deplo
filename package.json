@@ -1,0 +1,30 @@
+{
+  "name": "space-survival-3d",
+  "version": "1.0.0",
+  "description": "A 3D space survival shooter game built with Three.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && netlify deploy --prod --dir=dist"
+  },
+  "keywords": [
+    "game",
+    "3d",
+    "threejs",
+    "space",
+    "shooter"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "@types/three": "^0.183.1",
+    "netlify-cli": "^24.0.1",
+    "terser": "^5.46.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  }
+}

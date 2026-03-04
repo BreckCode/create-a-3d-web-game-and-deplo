@@ -1,0 +1,23 @@
+## Tasks
+
+- [ ] 1. Core game engine setup | Create the Game class with game loop (requestAnimationFrame), Scene class with Three.js renderer/camera/lighting, and main.ts entry point that bootstraps everything | files: src/main.ts, src/core/Game.ts, src/core/Scene.ts
+- [ ] 2. Input management system | Build InputManager to track keyboard state (WASD/arrows/space) and mouse position/movement with pointer lock support | files: src/core/InputManager.ts
+- [ ] 3. Game constants and math utilities | Define all game configuration (speeds, spawn rates, sizes, colors) and math helpers (random range, vector utils, lerp) | files: src/utils/constants.ts, src/utils/math.ts
+- [ ] 4. Player ship entity | Create the player spaceship with procedural 3D model (combined geometries), movement controls, rotation toward mouse, boundary clamping, and health system | files: src/entities/Player.ts
+- [ ] 5. Projectile system | Implement projectile entity with object pooling, firing mechanics from player (spacebar/click), projectile movement, and lifetime management | files: src/entities/Projectile.ts
+- [ ] 6. Asteroid field | Create asteroid entities with procedural geometry (noisy icosahedrons), varied sizes/speeds, rotation, and scrolling toward player | files: src/entities/Asteroid.ts
+- [ ] 7. Spawn system | Build the spawner that manages asteroid waves, enemy waves, and power-up drops with progressive difficulty scaling over time | files: src/systems/SpawnSystem.ts
+- [ ] 8. Collision detection system | Implement sphere-based collision detection between all entity types (player-asteroid, projectile-asteroid, player-enemy, projectile-enemy, player-powerup) | files: src/systems/CollisionSystem.ts
+- [ ] 9. Enemy ships with AI | Create enemy entities with procedural models, basic AI (fly toward player, strafe, shoot), health, and death behavior | files: src/entities/Enemy.ts
+- [ ] 10. Power-up system | Implement collectible power-ups (shield, rapid fire, health restore) with visual indicators, timed effects, and pickup behavior | files: src/entities/PowerUp.ts
+- [ ] 11. Particle effects system | Create particle system for explosions (asteroid/enemy destruction), engine trails (player/enemies), projectile impacts, and power-up collection effects | files: src/systems/ParticleSystem.ts
+- [ ] 12. Score and progression system | Build score tracking with combo multipliers, difficulty progression curves, and localStorage high score persistence | files: src/systems/ScoreSystem.ts
+- [ ] 13. Space environment | Create the background environment with starfield (particle system), scrolling nebula colors, ambient lighting, and depth fog | files: src/core/Scene.ts, src/core/AssetManager.ts
+- [ ] 14. HUD overlay | Build the in-game heads-up display showing health bar, score, high score, active power-ups, and combo multiplier using HTML/CSS overlay | files: src/ui/HUD.ts, src/styles/main.css
+- [ ] 15. Menu and game over screens | Create the title/start screen with game name and controls info, and game over screen with final score, high score, and restart button | files: src/ui/MenuScreen.ts, src/ui/GameOverScreen.ts, src/styles/main.css
+- [ ] 16. Audio system | Implement AudioManager with procedurally generated sound effects (shoot, explosion, pickup, hit) and ambient background music using Web Audio API | files: src/core/AudioManager.ts
+- [ ] 17. Game state management | Wire up complete game flow: menu → playing → game over → restart, including pause functionality and state transitions | files: src/core/Game.ts
+- [ ] 18. Visual polish and effects | Add post-processing bloom/glow effects, screen shake on damage, flash effects on hits, smooth camera movements, and overall visual refinement | files: src/core/Scene.ts, src/core/Game.ts
+- [ ] 19. Performance optimization | Implement object pooling for all entities, frustum culling, efficient particle recycling, and ensure stable 60fps | files: src/core/Game.ts, src/entities/Projectile.ts, src/systems/ParticleSystem.ts
+- [ ] 20. Responsive design and cross-browser | Ensure canvas resizes properly, UI scales on different screen sizes, handle window focus/blur, and add loading state | files: src/main.ts, src/styles/main.css, src/core/Scene.ts
+- [ ] 21. Build, deploy to Netlify, and verify | Run production build, deploy to Netlify via CLI, verify the live URL works correctly | files: netlify.toml, package.json
