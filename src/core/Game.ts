@@ -3,6 +3,7 @@ import { Player } from '../entities/Player';
 import { ProjectilePool } from '../entities/Projectile';
 import { AsteroidPool } from '../entities/Asteroid';
 import { SpawnSystem } from '../systems/SpawnSystem';
+import { CollisionSystem } from '../systems/CollisionSystem';
 import { Scene } from './Scene';
 
 export enum GameState {
@@ -19,6 +20,7 @@ export class Game {
   public projectiles: ProjectilePool;
   public asteroids: AsteroidPool;
   public spawnSystem: SpawnSystem;
+  public collisionSystem: CollisionSystem;
   public state: GameState = GameState.MENU;
   public score = 0;
   public highScore = 0;
@@ -36,6 +38,10 @@ export class Game {
     this.projectiles = new ProjectilePool(this.scene.scene);
     this.asteroids = new AsteroidPool(this.scene.scene);
     this.spawnSystem = new SpawnSystem(this.asteroids);
+    this.collisionSystem = new CollisionSystem(this.player, this.projectiles, this.asteroids);
+    this.collisionSystem.onAsteroidDestroyed = (scoreValue) => {
+      this.score += scoreValue;
+    };
     this.highScore = this.loadHighScore();
   }
 
@@ -122,6 +128,9 @@ export class Game {
     this.spawnSystem.update(delta, this.elapsed);
 
     this.asteroids.update(delta);
+
+    // Collision detection
+    this.collisionSystem.update();
 
     if (!this.player.isAlive) {
       this.gameOver();

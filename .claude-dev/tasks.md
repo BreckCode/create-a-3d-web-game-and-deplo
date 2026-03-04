@@ -7,7 +7,7 @@
 - [x] 5. Projectile system | Implement projectile entity with object pooling, firing mechanics from player (spacebar/click), projectile movement, and lifetime management | files: src/entities/Projectile.ts
 - [x] 6. Asteroid field | Create asteroid entities with procedural geometry (noisy icosahedrons), varied sizes/speeds, rotation, and scrolling toward player | files: src/entities/Asteroid.ts
 - [x] 7. Spawn system | Build the spawner that manages asteroid waves, enemy waves, and power-up drops with progressive difficulty scaling over time | files: src/systems/SpawnSystem.ts
-- [ ] 8. Collision detection system | Implement sphere-based collision detection between all entity types (player-asteroid, projectile-asteroid, player-enemy, projectile-enemy, player-powerup) | files: src/systems/CollisionSystem.ts
+- [x] 8. Collision detection system | Implement sphere-based collision detection between all entity types (player-asteroid, projectile-asteroid, player-enemy, projectile-enemy, player-powerup) | files: src/systems/CollisionSystem.ts
 - [ ] 9. Enemy ships with AI | Create enemy entities with procedural models, basic AI (fly toward player, strafe, shoot), health, and death behavior | files: src/entities/Enemy.ts
 - [ ] 10. Power-up system | Implement collectible power-ups (shield, rapid fire, health restore) with visual indicators, timed effects, and pickup behavior | files: src/entities/PowerUp.ts
 - [ ] 11. Particle effects system | Create particle system for explosions (asteroid/enemy destruction), engine trails (player/enemies), projectile impacts, and power-up collection effects | files: src/systems/ParticleSystem.ts
