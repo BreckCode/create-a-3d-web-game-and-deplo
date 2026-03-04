@@ -1,5 +1,6 @@
 import { InputManager } from './InputManager';
 import { Player } from '../entities/Player';
+import { ProjectilePool } from '../entities/Projectile';
 import { Scene } from './Scene';
 
 export enum GameState {
@@ -13,6 +14,7 @@ export class Game {
   public scene: Scene;
   public input: InputManager;
   public player: Player;
+  public projectiles: ProjectilePool;
   public state: GameState = GameState.MENU;
   public score = 0;
   public highScore = 0;
@@ -27,6 +29,7 @@ export class Game {
     this.input = new InputManager(this.scene.renderer.domElement);
     this.player = new Player();
     this.scene.add(this.player.mesh);
+    this.projectiles = new ProjectilePool(this.scene.scene);
     this.highScore = this.loadHighScore();
   }
 
@@ -72,6 +75,7 @@ export class Game {
   public restart(): void {
     this.stop();
     this.player.reset();
+    this.projectiles.reset();
     this.start();
   }
 
@@ -93,6 +97,18 @@ export class Game {
 
   private update(delta: number): void {
     this.player.update(delta, this.input);
+
+    // Player shooting
+    if (this.input.shoot && this.player.canShoot()) {
+      this.player.shoot();
+      this.projectiles.fire(
+        this.player.getMuzzlePosition(),
+        this.player.getForwardDirection(),
+        'player',
+      );
+    }
+
+    this.projectiles.update(delta);
 
     if (!this.player.isAlive) {
       this.gameOver();
@@ -119,6 +135,7 @@ export class Game {
   public dispose(): void {
     this.stop();
     this.player.dispose();
+    this.projectiles.dispose();
     this.input.dispose();
     this.scene.dispose();
   }
