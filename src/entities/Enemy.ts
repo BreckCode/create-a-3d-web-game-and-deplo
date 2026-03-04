@@ -23,6 +23,9 @@ export class Enemy {
 
   // Target position for AI (player position)
   private targetPosition = new THREE.Vector3();
+  // Reusable vectors to avoid per-frame allocations
+  private tmpDir = new THREE.Vector3();
+  private tmpMuzzle = new THREE.Vector3();
 
   constructor() {
     this.mesh = new THREE.Group();
@@ -181,16 +184,12 @@ export class Enemy {
 
     this.fireCooldown = ENEMY.FIRE_RATE + randomRange(-0.3, 0.3);
 
-    // Fire toward the player
-    const direction = new THREE.Vector3()
-      .subVectors(this.targetPosition, this.mesh.position)
-      .normalize();
+    // Fire toward the player (reuse vectors to avoid allocations)
+    this.tmpDir.subVectors(this.targetPosition, this.mesh.position).normalize();
 
-    const muzzlePos = this.mesh.position.clone().add(
-      direction.clone().multiplyScalar(1.5),
-    );
+    this.tmpMuzzle.copy(this.mesh.position).addScaledVector(this.tmpDir, 1.5);
 
-    this.projectilePool.fire(muzzlePos, direction, 'enemy');
+    this.projectilePool.fire(this.tmpMuzzle, this.tmpDir, 'enemy');
   }
 
   private updateFlash(delta: number): void {
@@ -245,6 +244,8 @@ export class Enemy {
 export class EnemyPool {
   public enemies: Enemy[] = [];
   private scene: THREE.Scene;
+  private cachedActive: Enemy[] = [];
+  private activeDirty = true;
 
   constructor(scene: THREE.Scene, projectilePool: ProjectilePool, poolSize: number = ENEMY.MAX_COUNT) {
     this.scene = scene;
@@ -262,6 +263,7 @@ export class EnemyPool {
     for (const e of this.enemies) {
       if (!e.active) {
         e.activate();
+        this.activeDirty = true;
         return e;
       }
     }
@@ -271,13 +273,28 @@ export class EnemyPool {
   /** Update all active enemies */
   public update(delta: number, playerPosition: THREE.Vector3): void {
     for (const e of this.enemies) {
+      if (!e.active) continue;
+      const wasBefore = e.active;
       e.update(delta, playerPosition);
+      if (wasBefore && !e.active) this.activeDirty = true;
     }
   }
 
-  /** Get all active enemies */
+  /** Get all active enemies (cached — no allocation per frame) */
   public getActive(): Enemy[] {
-    return this.enemies.filter((e) => e.active);
+    if (this.activeDirty) {
+      this.cachedActive.length = 0;
+      for (const e of this.enemies) {
+        if (e.active) this.cachedActive.push(e);
+      }
+      this.activeDirty = false;
+    }
+    return this.cachedActive;
+  }
+
+  /** Mark cached active list as dirty (call when external code deactivates an enemy) */
+  public markDirty(): void {
+    this.activeDirty = true;
   }
 
   /** Deactivate all enemies */
@@ -285,6 +302,7 @@ export class EnemyPool {
     for (const e of this.enemies) {
       e.deactivate();
     }
+    this.activeDirty = true;
   }
 
   public dispose(): void {

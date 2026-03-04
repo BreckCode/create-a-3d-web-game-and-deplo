@@ -27,6 +27,7 @@ interface EnemyLike {
 
 interface EnemyPoolLike {
   getActive(): EnemyLike[];
+  enemies: EnemyLike[];
 }
 
 /** Interface for power-up pool (registered later when power-ups are implemented) */
@@ -40,6 +41,7 @@ interface PowerUpLike {
 
 interface PowerUpPoolLike {
   getActive(): PowerUpLike[];
+  powerUps: PowerUpLike[];
 }
 
 export type PowerUpCollectedCallback = (type: string, position: THREE.Vector3) => void;
@@ -151,12 +153,12 @@ export class CollisionSystem {
     if (!this.enemyPool) return;
 
     const activeProjectiles = this.projectiles.projectiles;
-    const activeEnemies = this.enemyPool.getActive();
+    const enemies = this.enemyPool.enemies;
 
     for (const projectile of activeProjectiles) {
       if (!projectile.active || projectile.owner !== 'player') continue;
 
-      for (const enemy of activeEnemies) {
+      for (const enemy of enemies) {
         if (!enemy.active) continue;
 
         if (spheresOverlap(
@@ -182,9 +184,9 @@ export class CollisionSystem {
   private checkPlayerVsEnemies(): void {
     if (!this.enemyPool) return;
 
-    const activeEnemies = this.enemyPool.getActive();
+    const enemies = this.enemyPool.enemies;
 
-    for (const enemy of activeEnemies) {
+    for (const enemy of enemies) {
       if (!enemy.active) continue;
 
       if (spheresOverlap(
@@ -230,9 +232,9 @@ export class CollisionSystem {
   private checkPlayerVsPowerUps(): void {
     if (!this.powerUpPool) return;
 
-    const activePowerUps = this.powerUpPool.getActive();
+    const powerUps = this.powerUpPool.powerUps;
 
-    for (const powerUp of activePowerUps) {
+    for (const powerUp of powerUps) {
       if (!powerUp.active) continue;
 
       if (spheresOverlap(

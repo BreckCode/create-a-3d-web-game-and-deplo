@@ -24,6 +24,12 @@ export class ParticleSystem {
   private sizes: Float32Array;
   private activeCount = 0;
 
+  // Free list for O(1) particle acquisition
+  private freeIndices: number[] = [];
+
+  // Reusable temporaries to avoid per-call allocations
+  private static tmpColor = new THREE.Color();
+
   constructor(scene: THREE.Scene) {
     const max = PARTICLES.MAX_PARTICLES;
 
@@ -38,6 +44,7 @@ export class ParticleSystem {
         color: new THREE.Color(1, 1, 1),
         active: false,
       });
+      this.freeIndices.push(i);
     }
 
     // Allocate typed arrays
@@ -64,18 +71,17 @@ export class ParticleSystem {
     scene.add(this.points);
   }
 
-  /** Acquire a free particle from the pool */
+  /** Acquire a free particle from the pool using the free list (O(1) amortized) */
   private acquire(): Particle | null {
-    for (const p of this.particles) {
-      if (!p.active) return p;
-    }
-    return null;
+    if (this.freeIndices.length === 0) return null;
+    const idx = this.freeIndices.pop()!;
+    return this.particles[idx];
   }
 
   /** Spawn an explosion burst at a position */
   public explosion(position: THREE.Vector3, color: number = COLORS.EXPLOSION, count?: number): void {
     const n = count ?? PARTICLES.EXPLOSION_COUNT;
-    const baseColor = new THREE.Color(color);
+    ParticleSystem.tmpColor.setHex(color);
 
     for (let i = 0; i < n; i++) {
       const p = this.acquire();
@@ -93,7 +99,7 @@ export class ParticleSystem {
       p.size = randomRange(0.3, 1.0);
 
       // Slight color variation
-      p.color.copy(baseColor);
+      p.color.copy(ParticleSystem.tmpColor);
       p.color.r += randomRange(-0.1, 0.1);
       p.color.g += randomRange(-0.1, 0.1);
       p.color.b += randomRange(-0.05, 0.05);
@@ -102,7 +108,7 @@ export class ParticleSystem {
 
   /** Spawn impact particles (smaller burst for projectile hits) */
   public impact(position: THREE.Vector3, color: number = COLORS.EXPLOSION): void {
-    const baseColor = new THREE.Color(color);
+    ParticleSystem.tmpColor.setHex(color);
 
     for (let i = 0; i < PARTICLES.IMPACT_COUNT; i++) {
       const p = this.acquire();
@@ -118,13 +124,13 @@ export class ParticleSystem {
       p.maxLife = randomRange(PARTICLES.IMPACT_LIFETIME * 0.5, PARTICLES.IMPACT_LIFETIME);
       p.life = p.maxLife;
       p.size = randomRange(0.15, 0.5);
-      p.color.copy(baseColor);
+      p.color.copy(ParticleSystem.tmpColor);
     }
   }
 
   /** Spawn engine trail particles behind a moving object */
   public trail(position: THREE.Vector3, color: number = COLORS.PLAYER_ENGINE): void {
-    const baseColor = new THREE.Color(color);
+    ParticleSystem.tmpColor.setHex(color);
 
     for (let i = 0; i < PARTICLES.TRAIL_COUNT; i++) {
       const p = this.acquire();
@@ -146,13 +152,13 @@ export class ParticleSystem {
       p.maxLife = randomRange(PARTICLES.TRAIL_LIFETIME * 0.5, PARTICLES.TRAIL_LIFETIME);
       p.life = p.maxLife;
       p.size = randomRange(0.15, 0.4);
-      p.color.copy(baseColor);
+      p.color.copy(ParticleSystem.tmpColor);
     }
   }
 
   /** Spawn a ring of particles for power-up collection */
   public pickup(position: THREE.Vector3, color: number): void {
-    const baseColor = new THREE.Color(color);
+    ParticleSystem.tmpColor.setHex(color);
 
     for (let i = 0; i < PARTICLES.PICKUP_COUNT; i++) {
       const p = this.acquire();
@@ -173,7 +179,7 @@ export class ParticleSystem {
       p.maxLife = randomRange(PARTICLES.PICKUP_LIFETIME * 0.5, PARTICLES.PICKUP_LIFETIME);
       p.life = p.maxLife;
       p.size = randomRange(0.2, 0.6);
-      p.color.copy(baseColor);
+      p.color.copy(ParticleSystem.tmpColor);
     }
   }
 
@@ -181,12 +187,14 @@ export class ParticleSystem {
   public update(delta: number): void {
     this.activeCount = 0;
 
-    for (const p of this.particles) {
+    for (let idx = 0; idx < this.particles.length; idx++) {
+      const p = this.particles[idx];
       if (!p.active) continue;
 
       p.life -= delta;
       if (p.life <= 0) {
         p.active = false;
+        this.freeIndices.push(idx);
         continue;
       }
 
@@ -227,10 +235,12 @@ export class ParticleSystem {
     sizeAttr.needsUpdate = true;
   }
 
-  /** Deactivate all particles */
+  /** Deactivate all particles and rebuild free list */
   public reset(): void {
-    for (const p of this.particles) {
-      p.active = false;
+    this.freeIndices.length = 0;
+    for (let i = 0; i < this.particles.length; i++) {
+      this.particles[i].active = false;
+      this.freeIndices.push(i);
     }
     this.activeCount = 0;
     this.geometry.setDrawRange(0, 0);

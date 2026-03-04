@@ -151,6 +151,8 @@ export class Asteroid {
 export class AsteroidPool {
   public asteroids: Asteroid[] = [];
   private scene: THREE.Scene;
+  private cachedActive: Asteroid[] = [];
+  private activeDirty = true;
 
   constructor(scene: THREE.Scene, poolSize: number = ASTEROID.MAX_COUNT) {
     this.scene = scene;
@@ -167,6 +169,7 @@ export class AsteroidPool {
     for (const a of this.asteroids) {
       if (!a.active) {
         a.activate(sizeKey);
+        this.activeDirty = true;
         return a;
       }
     }
@@ -176,13 +179,28 @@ export class AsteroidPool {
   /** Update all active asteroids */
   public update(delta: number): void {
     for (const a of this.asteroids) {
+      if (!a.active) continue;
+      const wasBefore = a.active;
       a.update(delta);
+      if (wasBefore && !a.active) this.activeDirty = true;
     }
   }
 
-  /** Get all active asteroids */
+  /** Get all active asteroids (cached — no allocation per frame) */
   public getActive(): Asteroid[] {
-    return this.asteroids.filter((a) => a.active);
+    if (this.activeDirty) {
+      this.cachedActive.length = 0;
+      for (const a of this.asteroids) {
+        if (a.active) this.cachedActive.push(a);
+      }
+      this.activeDirty = false;
+    }
+    return this.cachedActive;
+  }
+
+  /** Mark cached active list as dirty (call when external code deactivates an asteroid) */
+  public markDirty(): void {
+    this.activeDirty = true;
   }
 
   /** Deactivate all asteroids */
@@ -190,6 +208,7 @@ export class AsteroidPool {
     for (const a of this.asteroids) {
       a.deactivate();
     }
+    this.activeDirty = true;
   }
 
   public dispose(): void {

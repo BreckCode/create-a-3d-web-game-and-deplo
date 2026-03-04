@@ -56,6 +56,9 @@ export class Game {
   private pauseOverlay: HTMLElement;
   private gameOverDelay = 0;
 
+  // Reusable Vector3 to avoid per-frame allocations
+  private tmpVec = new THREE.Vector3();
+
   constructor(container: HTMLElement) {
     this.scene = new Scene(container);
     this.input = new InputManager(this.scene.renderer.domElement);
@@ -276,14 +279,16 @@ export class Game {
     // Collision detection
     this.collisionSystem.update();
 
-    // Engine trails
+    // Engine trails (reuse tmpVec to avoid allocations)
     if (this.player.isAlive) {
-      const enginePos = this.player.mesh.localToWorld(new THREE.Vector3(0, 0, 1.5));
-      this.particleSystem.trail(enginePos, COLORS.PLAYER_ENGINE);
+      this.tmpVec.set(0, 0, 1.5);
+      this.player.mesh.localToWorld(this.tmpVec);
+      this.particleSystem.trail(this.tmpVec, COLORS.PLAYER_ENGINE);
     }
     for (const e of this.enemies.getActive()) {
-      const enginePos = e.mesh.localToWorld(new THREE.Vector3(0, 0, -1.3));
-      this.particleSystem.trail(enginePos, COLORS.ENEMY_ACCENT);
+      this.tmpVec.set(0, 0, -1.3);
+      e.mesh.localToWorld(this.tmpVec);
+      this.particleSystem.trail(this.tmpVec, COLORS.ENEMY_ACCENT);
     }
 
     // Particle system

@@ -3,6 +3,23 @@ import { PROJECTILE, COLORS } from '../utils/constants';
 
 export type ProjectileOwner = 'player' | 'enemy';
 
+// Shared geometry and materials across all projectile instances to reduce GPU memory
+const sharedGeometry = new THREE.SphereGeometry(PROJECTILE.SIZE, 6, 4);
+const sharedPlayerMaterial = new THREE.MeshStandardMaterial({
+  color: COLORS.PROJECTILE_PLAYER,
+  emissive: COLORS.PROJECTILE_PLAYER,
+  emissiveIntensity: 2.0,
+  transparent: true,
+  opacity: 0.9,
+});
+const sharedEnemyMaterial = new THREE.MeshStandardMaterial({
+  color: COLORS.PROJECTILE_ENEMY,
+  emissive: COLORS.PROJECTILE_ENEMY,
+  emissiveIntensity: 2.0,
+  transparent: true,
+  opacity: 0.9,
+});
+
 export class Projectile {
   public mesh: THREE.Mesh;
   public active: boolean = false;
@@ -13,29 +30,8 @@ export class Projectile {
   private velocity = new THREE.Vector3();
   private lifetime: number = 0;
 
-  private playerMaterial: THREE.MeshStandardMaterial;
-  private enemyMaterial: THREE.MeshStandardMaterial;
-
   constructor() {
-    const geo = new THREE.SphereGeometry(PROJECTILE.SIZE, 6, 4);
-
-    this.playerMaterial = new THREE.MeshStandardMaterial({
-      color: COLORS.PROJECTILE_PLAYER,
-      emissive: COLORS.PROJECTILE_PLAYER,
-      emissiveIntensity: 2.0,
-      transparent: true,
-      opacity: 0.9,
-    });
-
-    this.enemyMaterial = new THREE.MeshStandardMaterial({
-      color: COLORS.PROJECTILE_ENEMY,
-      emissive: COLORS.PROJECTILE_ENEMY,
-      emissiveIntensity: 2.0,
-      transparent: true,
-      opacity: 0.9,
-    });
-
-    this.mesh = new THREE.Mesh(geo, this.playerMaterial);
+    this.mesh = new THREE.Mesh(sharedGeometry, sharedPlayerMaterial);
     this.mesh.visible = false;
   }
 
@@ -53,7 +49,7 @@ export class Projectile {
     this.velocity.copy(direction).normalize().multiplyScalar(speed);
 
     this.mesh.position.copy(position);
-    this.mesh.material = owner === 'player' ? this.playerMaterial : this.enemyMaterial;
+    this.mesh.material = owner === 'player' ? sharedPlayerMaterial : sharedEnemyMaterial;
     this.mesh.visible = true;
   }
 
@@ -78,9 +74,7 @@ export class Projectile {
   }
 
   public dispose(): void {
-    this.mesh.geometry.dispose();
-    this.playerMaterial.dispose();
-    this.enemyMaterial.dispose();
+    // Geometry and materials are shared — disposed by the pool
   }
 }
 
@@ -88,6 +82,9 @@ export class Projectile {
 export class ProjectilePool {
   public projectiles: Projectile[] = [];
   private scene: THREE.Scene;
+  // Cached active list to avoid per-frame allocations
+  private cachedActive: Projectile[] = [];
+  private activeDirty = true;
 
   constructor(scene: THREE.Scene, poolSize: number = PROJECTILE.POOL_SIZE) {
     this.scene = scene;
@@ -116,6 +113,7 @@ export class ProjectilePool {
     const p = this.acquire();
     if (p) {
       p.fire(position, direction, owner);
+      this.activeDirty = true;
     }
     return p;
   }
@@ -123,7 +121,10 @@ export class ProjectilePool {
   /** Update all active projectiles */
   public update(delta: number): void {
     for (const p of this.projectiles) {
+      if (!p.active) continue;
+      const wasBefore = p.active;
       p.update(delta);
+      if (wasBefore && !p.active) this.activeDirty = true;
     }
   }
 
@@ -132,18 +133,29 @@ export class ProjectilePool {
     for (const p of this.projectiles) {
       p.deactivate();
     }
+    this.activeDirty = true;
   }
 
-  /** Get all active projectiles */
+  /** Get all active projectiles (cached — no allocation per frame) */
   public getActive(): Projectile[] {
-    return this.projectiles.filter((p) => p.active);
+    if (this.activeDirty) {
+      this.cachedActive.length = 0;
+      for (const p of this.projectiles) {
+        if (p.active) this.cachedActive.push(p);
+      }
+      this.activeDirty = false;
+    }
+    return this.cachedActive;
   }
 
   public dispose(): void {
     for (const p of this.projectiles) {
       this.scene.remove(p.mesh);
-      p.dispose();
     }
     this.projectiles.length = 0;
+    // Dispose shared resources
+    sharedGeometry.dispose();
+    sharedPlayerMaterial.dispose();
+    sharedEnemyMaterial.dispose();
   }
 }

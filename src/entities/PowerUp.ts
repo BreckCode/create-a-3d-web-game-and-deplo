@@ -156,6 +156,8 @@ const POOL_SIZE = 8;
 export class PowerUpPool {
   public powerUps: PowerUp[] = [];
   private scene: THREE.Scene;
+  private cachedActive: PowerUp[] = [];
+  private activeDirty = true;
 
   constructor(scene: THREE.Scene, poolSize: number = POOL_SIZE) {
     this.scene = scene;
@@ -172,6 +174,7 @@ export class PowerUpPool {
     for (const p of this.powerUps) {
       if (!p.active) {
         p.activate(typeKey);
+        this.activeDirty = true;
         return p;
       }
     }
@@ -181,13 +184,28 @@ export class PowerUpPool {
   /** Update all active power-ups */
   public update(delta: number): void {
     for (const p of this.powerUps) {
+      if (!p.active) continue;
+      const wasBefore = p.active;
       p.update(delta);
+      if (wasBefore && !p.active) this.activeDirty = true;
     }
   }
 
-  /** Get all active power-ups */
+  /** Get all active power-ups (cached — no allocation per frame) */
   public getActive(): PowerUp[] {
-    return this.powerUps.filter((p) => p.active);
+    if (this.activeDirty) {
+      this.cachedActive.length = 0;
+      for (const p of this.powerUps) {
+        if (p.active) this.cachedActive.push(p);
+      }
+      this.activeDirty = false;
+    }
+    return this.cachedActive;
+  }
+
+  /** Mark cached active list as dirty */
+  public markDirty(): void {
+    this.activeDirty = true;
   }
 
   /** Deactivate all power-ups */
@@ -195,6 +213,7 @@ export class PowerUpPool {
     for (const p of this.powerUps) {
       p.deactivate();
     }
+    this.activeDirty = true;
   }
 
   public dispose(): void {
