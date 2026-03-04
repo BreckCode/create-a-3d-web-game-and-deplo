@@ -17,6 +17,7 @@ export class Asteroid {
   private speed: number = 0;
   private rotationAxis = new THREE.Vector3();
   private rotationSpeed: number = 0;
+  private flashTimer: number = 0;
 
   private material: THREE.MeshStandardMaterial;
 
@@ -110,6 +111,15 @@ export class Asteroid {
     if (this.mesh.position.z > ASTEROID.DESPAWN_Z) {
       this.deactivate();
     }
+
+    // Flash timer (frame-based instead of setTimeout to avoid race conditions with pooling)
+    if (this.flashTimer > 0) {
+      this.flashTimer -= delta;
+      if (this.flashTimer <= 0) {
+        this.material.emissive.setHex(0x000000);
+        this.material.emissiveIntensity = 0;
+      }
+    }
   }
 
   public takeDamage(amount: number): boolean {
@@ -121,12 +131,7 @@ export class Asteroid {
     // Flash brighter on hit
     this.material.emissive.setHex(0xffffff);
     this.material.emissiveIntensity = 0.5;
-    setTimeout(() => {
-      if (this.active) {
-        this.material.emissive.setHex(0x000000);
-        this.material.emissiveIntensity = 0;
-      }
-    }, 80);
+    this.flashTimer = 0.08;
     return false;
   }
 

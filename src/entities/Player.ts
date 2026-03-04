@@ -24,6 +24,8 @@ export class Player {
   private hullMaterial: THREE.MeshStandardMaterial;
   private flashTimer: number = 0;
   private originalEmissive = new THREE.Color(0x000000);
+  private tmpMuzzle = new THREE.Vector3();
+  private tmpForward = new THREE.Vector3();
 
   constructor() {
     this.mesh = new THREE.Group();
@@ -226,16 +228,16 @@ export class Player {
 
   /** Get the world-space position of the gun muzzle (front of ship) */
   public getMuzzlePosition(): THREE.Vector3 {
-    const muzzle = new THREE.Vector3(0, 0, -1.8);
-    this.mesh.localToWorld(muzzle);
-    return muzzle;
+    this.tmpMuzzle.set(0, 0, -1.8);
+    this.mesh.localToWorld(this.tmpMuzzle);
+    return this.tmpMuzzle;
   }
 
   /** Get forward direction of the ship */
   public getForwardDirection(): THREE.Vector3 {
-    const dir = new THREE.Vector3(0, 0, -1);
-    dir.applyQuaternion(this.mesh.quaternion);
-    return dir.normalize();
+    this.tmpForward.set(0, 0, -1);
+    this.tmpForward.applyQuaternion(this.mesh.quaternion);
+    return this.tmpForward.normalize();
   }
 
   public takeDamage(amount: number): void {

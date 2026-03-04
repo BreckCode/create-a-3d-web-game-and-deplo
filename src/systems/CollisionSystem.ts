@@ -28,6 +28,7 @@ interface EnemyLike {
 interface EnemyPoolLike {
   getActive(): EnemyLike[];
   enemies: EnemyLike[];
+  markDirty(): void;
 }
 
 /** Interface for power-up pool (registered later when power-ups are implemented) */
@@ -42,6 +43,7 @@ interface PowerUpLike {
 interface PowerUpPoolLike {
   getActive(): PowerUpLike[];
   powerUps: PowerUpLike[];
+  markDirty(): void;
 }
 
 export type PowerUpCollectedCallback = (type: string, position: THREE.Vector3) => void;
@@ -112,6 +114,8 @@ export class CollisionSystem {
           const hitPos = projectile.position.clone();
           const destroyed = asteroid.takeDamage(projectile.damage);
           projectile.deactivate();
+          this.projectiles.markDirty();
+          if (destroyed) this.asteroids.markDirty();
 
           if (this.onProjectileImpact) {
             this.onProjectileImpact(hitPos, 0x00ffaa);
@@ -140,6 +144,7 @@ export class CollisionSystem {
         const collisionPos = asteroid.position.clone();
         this.player.takeDamage(damage);
         asteroid.deactivate();
+        this.asteroids.markDirty();
 
         if (this.onPlayerHit) {
           this.onPlayerHit(collisionPos);
@@ -168,6 +173,8 @@ export class CollisionSystem {
           const hitPos = projectile.position.clone();
           const destroyed = enemy.takeDamage(projectile.damage);
           projectile.deactivate();
+          this.projectiles.markDirty();
+          if (destroyed) this.enemyPool!.markDirty();
 
           if (this.onProjectileImpact) {
             this.onProjectileImpact(hitPos, 0x00ffaa);
@@ -196,6 +203,7 @@ export class CollisionSystem {
         const collisionPos = enemy.position.clone();
         this.player.takeDamage(PLAYER.MAX_HEALTH * 0.3);
         enemy.deactivate();
+        this.enemyPool!.markDirty();
 
         if (this.onPlayerHit) {
           this.onPlayerHit(collisionPos);
@@ -218,6 +226,7 @@ export class CollisionSystem {
         const hitPos = projectile.position.clone();
         this.player.takeDamage(projectile.damage);
         projectile.deactivate();
+        this.projectiles.markDirty();
 
         if (this.onProjectileImpact) {
           this.onProjectileImpact(hitPos, 0xff4444);
@@ -242,6 +251,7 @@ export class CollisionSystem {
         powerUp.position, powerUp.collisionRadius,
       )) {
         powerUp.collect();
+        this.powerUpPool!.markDirty();
 
         if (this.onPowerUpCollected) {
           this.onPowerUpCollected(powerUp.type, powerUp.position.clone());

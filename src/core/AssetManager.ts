@@ -19,6 +19,7 @@ export class AssetManager {
 
   // Nebula layers
   private nebulaLayers: THREE.Mesh[] = [];
+  private nebulaBaseOpacities: number[] = [];
   private nebulaTime = 0;
 
   constructor() {
@@ -104,6 +105,7 @@ export class AssetManager {
       mesh.rotation.z = randomRange(0, Math.PI * 2);
 
       this.nebulaLayers.push(mesh);
+      this.nebulaBaseOpacities.push(config.opacity);
       this.group.add(mesh);
     }
 
@@ -127,6 +129,7 @@ export class AssetManager {
       const mesh = new THREE.Mesh(geometry, material);
       mesh.position.copy(cloud.pos);
       this.nebulaLayers.push(mesh);
+      this.nebulaBaseOpacities.push(cloud.opacity);
       this.group.add(mesh);
     }
   }
@@ -145,9 +148,9 @@ export class AssetManager {
       // Slow rotation
       layer.rotation.z += delta * 0.01 * (i % 2 === 0 ? 1 : -1);
 
-      // Subtle color pulsing via opacity
+      // Subtle color pulsing via opacity (use stored base to prevent drift)
       const mat = layer.material as THREE.MeshBasicMaterial;
-      const baseOpacity = mat.opacity;
+      const baseOpacity = this.nebulaBaseOpacities[i];
       const pulse = Math.sin(this.nebulaTime * 0.3 + i * 1.5) * 0.01;
       mat.opacity = Math.max(0.01, baseOpacity + pulse);
     }

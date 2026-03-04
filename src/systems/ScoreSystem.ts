@@ -91,7 +91,9 @@ export class ScoreSystem {
   private loadHighScore(): number {
     try {
       const saved = localStorage.getItem(HIGH_SCORE_KEY);
-      return saved ? parseInt(saved, 10) : 0;
+      if (!saved) return 0;
+      const parsed = parseInt(saved, 10);
+      return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
     } catch {
       return 0;
     }

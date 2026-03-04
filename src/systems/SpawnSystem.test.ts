@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SpawnSystem } from './SpawnSystem';
-import { SPAWN, ENEMY } from '../utils/constants';
+import { SPAWN } from '../utils/constants';
 
 // Mock AsteroidPool
 function createMockAsteroidPool() {

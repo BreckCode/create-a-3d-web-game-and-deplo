@@ -82,8 +82,8 @@ function createMockPowerUp(opts: {
 
 describe('CollisionSystem', () => {
   let player: ReturnType<typeof createMockPlayer>;
-  let projectilePool: { projectiles: ReturnType<typeof createMockProjectile>[]; getActive: () => any[] };
-  let asteroidPool: { asteroids: ReturnType<typeof createMockAsteroid>[]; getActive: () => any[] };
+  let projectilePool: { projectiles: ReturnType<typeof createMockProjectile>[]; getActive: () => any[]; markDirty: ReturnType<typeof vi.fn> };
+  let asteroidPool: { asteroids: ReturnType<typeof createMockAsteroid>[]; getActive: () => any[]; markDirty: ReturnType<typeof vi.fn> };
   let collisionSystem: CollisionSystem;
 
   beforeEach(() => {
@@ -91,10 +91,12 @@ describe('CollisionSystem', () => {
     projectilePool = {
       projectiles: [],
       getActive: function() { return this.projectiles.filter((p: any) => p.active); },
+      markDirty: vi.fn(),
     };
     asteroidPool = {
       asteroids: [],
       getActive: function() { return this.asteroids.filter((a: any) => a.active); },
+      markDirty: vi.fn(),
     };
     collisionSystem = new CollisionSystem(player as any, projectilePool as any, asteroidPool as any);
   });
@@ -203,6 +205,7 @@ describe('CollisionSystem', () => {
       const enemyPool = {
         enemies: [enemy],
         getActive: () => [enemy],
+        markDirty: vi.fn(),
       };
       collisionSystem.setEnemyPool(enemyPool);
 
@@ -222,6 +225,7 @@ describe('CollisionSystem', () => {
       const enemyPool = {
         enemies: [enemy],
         getActive: () => [enemy],
+        markDirty: vi.fn(),
       };
       collisionSystem.setEnemyPool(enemyPool);
 
@@ -242,6 +246,7 @@ describe('CollisionSystem', () => {
       const powerUpPool = {
         powerUps: [powerUp],
         getActive: () => [powerUp],
+        markDirty: vi.fn(),
       };
       collisionSystem.setPowerUpPool(powerUpPool);
 

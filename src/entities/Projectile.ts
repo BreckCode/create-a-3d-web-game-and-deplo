@@ -128,6 +128,11 @@ export class ProjectilePool {
     }
   }
 
+  /** Mark cached active list as dirty (call when external code deactivates a projectile) */
+  public markDirty(): void {
+    this.activeDirty = true;
+  }
+
   /** Deactivate all projectiles */
   public reset(): void {
     for (const p of this.projectiles) {
