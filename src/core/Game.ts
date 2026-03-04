@@ -10,6 +10,7 @@ import { CollisionSystem } from '../systems/CollisionSystem';
 import { ParticleSystem } from '../systems/ParticleSystem';
 import { ScoreSystem } from '../systems/ScoreSystem';
 import { Scene } from './Scene';
+import { HUD } from '../ui/HUD';
 import { POWERUP, COLORS } from '../utils/constants';
 
 export enum GameState {
@@ -31,10 +32,11 @@ export class Game {
   public collisionSystem: CollisionSystem;
   public particleSystem: ParticleSystem;
   public scoreSystem: ScoreSystem;
+  public hud: HUD;
 
   // Power-up effect timers
-  private shieldTimer = 0;
-  private rapidFireTimer = 0;
+  public shieldTimer = 0;
+  public rapidFireTimer = 0;
   public state: GameState = GameState.MENU;
   public elapsed = 0;
 
@@ -86,6 +88,7 @@ export class Game {
     this.collisionSystem.onProjectileImpact = (position, color) => {
       this.particleSystem.impact(position, color);
     };
+    this.hud = new HUD(this);
   }
 
   public start(): void {
@@ -153,6 +156,7 @@ export class Game {
     // Always update environment (starfield animation even when paused/menu)
     this.scene.update(delta);
     this.scene.render();
+    this.hud.update();
     this.input.update();
   };
 
@@ -246,6 +250,7 @@ export class Game {
     this.enemies.dispose();
     this.powerUps.dispose();
     this.particleSystem.dispose();
+    this.hud.dispose();
     this.input.dispose();
     this.scene.dispose();
   }

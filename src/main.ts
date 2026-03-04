@@ -1,4 +1,5 @@
 import { Game } from './core/Game';
+import './styles/main.css';
 
 let game: Game | null = null;
 

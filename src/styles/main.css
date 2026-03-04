@@ -1,0 +1,186 @@
+/* ── HUD Overlay ─────────────────────────────────────────── */
+#hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  color: #ffffff;
+  user-select: none;
+}
+
+/* ── Top bar: score + high score ─────────────────────────── */
+.hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 30px;
+}
+
+.hud-score {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffcc00;
+  text-shadow: 0 0 10px rgba(255, 204, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 1px;
+}
+
+.hud-highscore {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  margin-top: 4px;
+}
+
+/* ── Combo multiplier ────────────────────────────────────── */
+.hud-combo {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  font-weight: 700;
+  color: #ff8800;
+  text-shadow: 0 0 12px rgba(255, 136, 0, 0.7), 0 2px 4px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.hud-combo.active {
+  opacity: 1;
+}
+
+.hud-combo.pulse {
+  animation: combo-pulse 0.3s ease-out;
+}
+
+@keyframes combo-pulse {
+  0% { transform: translateX(-50%) scale(1.4); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+/* ── Health bar (bottom-left) ────────────────────────────── */
+.hud-health {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+}
+
+.hud-health-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 6px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.hud-health-bar {
+  width: 200px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.hud-health-fill {
+  height: 100%;
+  width: 100%;
+  background: #44ff44;
+  border-radius: 5px;
+  transition: width 0.2s ease, background-color 0.3s ease;
+  box-shadow: 0 0 6px rgba(68, 255, 68, 0.4);
+}
+
+.hud-health-fill.low {
+  background: #ff4444;
+  box-shadow: 0 0 6px rgba(255, 68, 68, 0.4);
+}
+
+.hud-health-fill.critical {
+  background: #ff2222;
+  box-shadow: 0 0 10px rgba(255, 34, 34, 0.6);
+  animation: health-flash 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes health-flash {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+.hud-health-text {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+}
+
+/* ── Active power-ups (bottom-right) ─────────────────────── */
+.hud-powerups {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.hud-powerup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.hud-powerup.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hud-powerup-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  border: 2px solid;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.hud-powerup-icon.shield {
+  background: rgba(68, 136, 255, 0.2);
+  border-color: #4488ff;
+  color: #4488ff;
+  box-shadow: 0 0 10px rgba(68, 136, 255, 0.3);
+}
+
+.hud-powerup-icon.rapid-fire {
+  background: rgba(255, 170, 0, 0.2);
+  border-color: #ffaa00;
+  color: #ffaa00;
+  box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
+}
+
+.hud-powerup-timer {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.hud-powerup-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.5);
+}
