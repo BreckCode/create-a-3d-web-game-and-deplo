@@ -6,10 +6,13 @@ import { spheresOverlap } from '../utils/math';
 import { ASTEROID, PLAYER } from '../utils/constants';
 
 /** Callback when an asteroid is destroyed by a projectile */
-export type AsteroidDestroyedCallback = (scoreValue: number) => void;
+export type AsteroidDestroyedCallback = (scoreValue: number, position: THREE.Vector3) => void;
 
 /** Callback when the player takes collision damage */
-export type PlayerHitCallback = () => void;
+export type PlayerHitCallback = (position: THREE.Vector3) => void;
+
+/** Callback when a projectile impacts (hit but not necessarily destroyed) */
+export type ProjectileImpactCallback = (position: THREE.Vector3, color: number) => void;
 
 /** Interface for enemy pool (registered later when enemies are implemented) */
 interface EnemyLike {
@@ -39,8 +42,8 @@ interface PowerUpPoolLike {
   getActive(): PowerUpLike[];
 }
 
-export type PowerUpCollectedCallback = (type: string) => void;
-export type EnemyDestroyedCallback = (scoreValue: number) => void;
+export type PowerUpCollectedCallback = (type: string, position: THREE.Vector3) => void;
+export type EnemyDestroyedCallback = (scoreValue: number, position: THREE.Vector3) => void;
 
 export class CollisionSystem {
   private player: Player;
@@ -54,6 +57,7 @@ export class CollisionSystem {
   public onEnemyDestroyed: EnemyDestroyedCallback | null = null;
   public onPlayerHit: PlayerHitCallback | null = null;
   public onPowerUpCollected: PowerUpCollectedCallback | null = null;
+  public onProjectileImpact: ProjectileImpactCallback | null = null;
 
   constructor(player: Player, projectiles: ProjectilePool, asteroids: AsteroidPool) {
     this.player = player;
@@ -103,11 +107,15 @@ export class CollisionSystem {
           projectile.position, projectile.collisionRadius,
           asteroid.position, asteroid.collisionRadius,
         )) {
+          const hitPos = projectile.position.clone();
           const destroyed = asteroid.takeDamage(projectile.damage);
           projectile.deactivate();
 
+          if (this.onProjectileImpact) {
+            this.onProjectileImpact(hitPos, 0x00ffaa);
+          }
           if (destroyed && this.onAsteroidDestroyed) {
-            this.onAsteroidDestroyed(asteroid.scoreValue);
+            this.onAsteroidDestroyed(asteroid.scoreValue, asteroid.position.clone());
           }
           break; // projectile can only hit one asteroid
         }
@@ -127,11 +135,12 @@ export class CollisionSystem {
       )) {
         // Damage based on asteroid size
         const damage = ASTEROID.SIZES[asteroid.size].health;
+        const collisionPos = asteroid.position.clone();
         this.player.takeDamage(damage);
         asteroid.deactivate();
 
         if (this.onPlayerHit) {
-          this.onPlayerHit();
+          this.onPlayerHit(collisionPos);
         }
         break; // only one asteroid collision per frame
       }
@@ -154,11 +163,15 @@ export class CollisionSystem {
           projectile.position, projectile.collisionRadius,
           enemy.position, enemy.collisionRadius,
         )) {
+          const hitPos = projectile.position.clone();
           const destroyed = enemy.takeDamage(projectile.damage);
           projectile.deactivate();
 
+          if (this.onProjectileImpact) {
+            this.onProjectileImpact(hitPos, 0x00ffaa);
+          }
           if (destroyed && this.onEnemyDestroyed) {
-            this.onEnemyDestroyed(enemy.scoreValue);
+            this.onEnemyDestroyed(enemy.scoreValue, enemy.position.clone());
           }
           break;
         }
@@ -178,11 +191,12 @@ export class CollisionSystem {
         this.player.position, this.player.collisionRadius,
         enemy.position, enemy.collisionRadius,
       )) {
+        const collisionPos = enemy.position.clone();
         this.player.takeDamage(PLAYER.MAX_HEALTH * 0.3);
         enemy.deactivate();
 
         if (this.onPlayerHit) {
-          this.onPlayerHit();
+          this.onPlayerHit(collisionPos);
         }
         break;
       }
@@ -199,11 +213,15 @@ export class CollisionSystem {
         projectile.position, projectile.collisionRadius,
         this.player.position, this.player.collisionRadius,
       )) {
+        const hitPos = projectile.position.clone();
         this.player.takeDamage(projectile.damage);
         projectile.deactivate();
 
+        if (this.onProjectileImpact) {
+          this.onProjectileImpact(hitPos, 0xff4444);
+        }
         if (this.onPlayerHit) {
-          this.onPlayerHit();
+          this.onPlayerHit(hitPos);
         }
       }
     }
@@ -224,7 +242,7 @@ export class CollisionSystem {
         powerUp.collect();
 
         if (this.onPowerUpCollected) {
-          this.onPowerUpCollected(powerUp.type);
+          this.onPowerUpCollected(powerUp.type, powerUp.position.clone());
         }
       }
     }

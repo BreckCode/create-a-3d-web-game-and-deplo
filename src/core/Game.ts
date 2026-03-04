@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { InputManager } from './InputManager';
 import { Player } from '../entities/Player';
 import { ProjectilePool } from '../entities/Projectile';
@@ -6,8 +7,9 @@ import { EnemyPool } from '../entities/Enemy';
 import { PowerUpPool } from '../entities/PowerUp';
 import { SpawnSystem } from '../systems/SpawnSystem';
 import { CollisionSystem } from '../systems/CollisionSystem';
+import { ParticleSystem } from '../systems/ParticleSystem';
 import { Scene } from './Scene';
-import { POWERUP } from '../utils/constants';
+import { POWERUP, COLORS } from '../utils/constants';
 
 export enum GameState {
   MENU = 'menu',
@@ -26,6 +28,7 @@ export class Game {
   public powerUps: PowerUpPool;
   public spawnSystem: SpawnSystem;
   public collisionSystem: CollisionSystem;
+  public particleSystem: ParticleSystem;
 
   // Power-up effect timers
   private shieldTimer = 0;
@@ -51,17 +54,32 @@ export class Game {
     this.spawnSystem = new SpawnSystem(this.asteroids);
     this.spawnSystem.setEnemyPool(this.enemies);
     this.spawnSystem.setPowerUpPool(this.powerUps);
+    this.particleSystem = new ParticleSystem(this.scene.scene);
     this.collisionSystem = new CollisionSystem(this.player, this.projectiles, this.asteroids);
     this.collisionSystem.setEnemyPool(this.enemies);
     this.collisionSystem.setPowerUpPool(this.powerUps);
-    this.collisionSystem.onAsteroidDestroyed = (scoreValue) => {
+    this.collisionSystem.onAsteroidDestroyed = (scoreValue, position) => {
       this.score += scoreValue;
+      this.particleSystem.explosion(position, COLORS.ASTEROID_BASE);
     };
-    this.collisionSystem.onEnemyDestroyed = (scoreValue) => {
+    this.collisionSystem.onEnemyDestroyed = (scoreValue, position) => {
       this.score += scoreValue;
+      this.particleSystem.explosion(position, COLORS.ENEMY_HULL, 40);
     };
-    this.collisionSystem.onPowerUpCollected = (type) => {
+    this.collisionSystem.onPowerUpCollected = (type, position) => {
       this.applyPowerUp(type);
+      const colorMap: Record<string, number> = {
+        SHIELD: COLORS.SHIELD,
+        RAPID_FIRE: COLORS.RAPID_FIRE,
+        HEALTH: COLORS.HEALTH,
+      };
+      this.particleSystem.pickup(position, colorMap[type] ?? 0xffffff);
+    };
+    this.collisionSystem.onPlayerHit = (position) => {
+      this.particleSystem.explosion(position, COLORS.EXPLOSION, 15);
+    };
+    this.collisionSystem.onProjectileImpact = (position, color) => {
+      this.particleSystem.impact(position, color);
     };
     this.highScore = this.loadHighScore();
   }
@@ -113,6 +131,7 @@ export class Game {
     this.enemies.reset();
     this.powerUps.reset();
     this.spawnSystem.reset();
+    this.particleSystem.reset();
     this.shieldTimer = 0;
     this.rapidFireTimer = 0;
     this.start();
@@ -161,6 +180,19 @@ export class Game {
 
     // Collision detection
     this.collisionSystem.update();
+
+    // Engine trails
+    if (this.player.isAlive) {
+      const enginePos = this.player.mesh.localToWorld(new THREE.Vector3(0, 0, 1.5));
+      this.particleSystem.trail(enginePos, COLORS.PLAYER_ENGINE);
+    }
+    for (const e of this.enemies.getActive()) {
+      const enginePos = e.mesh.localToWorld(new THREE.Vector3(0, 0, -1.3));
+      this.particleSystem.trail(enginePos, COLORS.ENEMY_ACCENT);
+    }
+
+    // Particle system
+    this.particleSystem.update(delta);
 
     if (!this.player.isAlive) {
       this.gameOver();
@@ -224,6 +256,7 @@ export class Game {
     this.asteroids.dispose();
     this.enemies.dispose();
     this.powerUps.dispose();
+    this.particleSystem.dispose();
     this.input.dispose();
     this.scene.dispose();
   }
