@@ -101,9 +101,9 @@ export class HUD {
   }
 
   public update(): void {
-    const playing = this.game.state === GameState.PLAYING;
-    this.container.style.display = playing ? '' : 'none';
-    if (!playing) return;
+    const visible = this.game.state === GameState.PLAYING || this.game.state === GameState.PAUSED;
+    this.container.style.display = visible ? '' : 'none';
+    if (!visible) return;
 
     // Score
     this.scoreEl.textContent = this.game.score.toLocaleString();

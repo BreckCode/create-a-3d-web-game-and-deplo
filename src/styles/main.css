@@ -403,6 +403,71 @@
   letter-spacing: 1px;
 }
 
+/* ── Pause Screen ────────────────────────────────────────── */
+#pause-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(0, 20, 40, 0.75) 0%, rgba(0, 0, 0, 0.85) 100%);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  color: #ffffff;
+  user-select: none;
+  animation: fade-in 0.2s ease;
+}
+
+.pause-content {
+  text-align: center;
+}
+
+.pause-title {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  margin: 0 0 36px;
+  color: #88bbff;
+  text-shadow: 0 0 30px rgba(68, 136, 255, 0.6), 0 0 60px rgba(68, 136, 255, 0.3);
+}
+
+.pause-resume-btn {
+  display: inline-block;
+  padding: 14px 48px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(68, 136, 255, 0.3), rgba(68, 136, 255, 0.1));
+  border: 2px solid rgba(68, 136, 255, 0.6);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  pointer-events: auto;
+  box-shadow: 0 0 20px rgba(68, 136, 255, 0.2);
+}
+
+.pause-resume-btn:hover {
+  background: linear-gradient(135deg, rgba(68, 136, 255, 0.5), rgba(68, 136, 255, 0.2));
+  box-shadow: 0 0 30px rgba(68, 136, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.pause-resume-btn:active {
+  transform: scale(0.98);
+}
+
+.pause-hint {
+  margin-top: 16px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 1px;
+}
+
 /* ── Shared animations ───────────────────────────────────── */
 @keyframes fade-in {
   from { opacity: 0; }

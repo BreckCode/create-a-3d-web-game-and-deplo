@@ -17,6 +17,7 @@ export class MenuScreen {
           <div class="menu-control-row"><kbd>W A S D</kbd> <span>Move ship</span></div>
           <div class="menu-control-row"><kbd>MOUSE</kbd> <span>Aim direction</span></div>
           <div class="menu-control-row"><kbd>SPACE / CLICK</kbd> <span>Fire weapons</span></div>
+          <div class="menu-control-row"><kbd>ESC</kbd> <span>Pause game</span></div>
         </div>
         <div class="menu-highscore"></div>
       </div>

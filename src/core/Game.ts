@@ -53,6 +53,8 @@ export class Game {
   private lastTime = 0;
   private animationFrameId = 0;
   private running = false;
+  private pauseOverlay: HTMLElement;
+  private gameOverDelay = 0;
 
   constructor(container: HTMLElement) {
     this.scene = new Scene(container);
@@ -102,6 +104,25 @@ export class Game {
     this.hud = new HUD(this);
     this.menuScreen = new MenuScreen(this);
     this.gameOverScreen = new GameOverScreen(this);
+
+    // Pause overlay
+    this.pauseOverlay = document.createElement('div');
+    this.pauseOverlay.id = 'pause-screen';
+    this.pauseOverlay.innerHTML = `
+      <div class="pause-content">
+        <h1 class="pause-title">PAUSED</h1>
+        <button class="pause-resume-btn" type="button">RESUME</button>
+        <div class="pause-hint">Press ESC to resume</div>
+      </div>
+    `;
+    this.pauseOverlay.style.display = 'none';
+    const resumeBtn = this.pauseOverlay.querySelector('.pause-resume-btn') as HTMLButtonElement;
+    resumeBtn.addEventListener('click', () => this.resume());
+    document.body.appendChild(this.pauseOverlay);
+
+    // Escape key for pause/resume
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+    document.addEventListener('keydown', this.handleKeyDown);
   }
 
   /** Start the render loop (does NOT change game state). */
@@ -132,24 +153,36 @@ export class Game {
   public pause(): void {
     if (this.state === GameState.PLAYING) {
       this.state = GameState.PAUSED;
+      this.pauseOverlay.style.display = '';
+      this.audio.stopMusic();
+      // Exit pointer lock so user can interact with pause UI
+      if (document.pointerLockElement) {
+        document.exitPointerLock();
+      }
     }
   }
 
   public resume(): void {
     if (this.state === GameState.PAUSED) {
       this.state = GameState.PLAYING;
+      this.pauseOverlay.style.display = 'none';
       this.lastTime = performance.now();
+      this.audio.startMusic();
     }
   }
 
   public gameOver(): void {
     this.state = GameState.GAME_OVER;
+    this.gameOverDelay = 0.5; // brief delay before allowing restart
     this.scoreSystem.finalizeScore();
     this.audio.stopMusic();
+    // Exit pointer lock so user can click restart
+    if (document.pointerLockElement) {
+      document.exitPointerLock();
+    }
   }
 
   public restart(): void {
-    this.stop();
     this.player.reset();
     this.projectiles.reset();
     this.asteroids.reset();
@@ -162,6 +195,17 @@ export class Game {
     this.start();
   }
 
+  private handleKeyDown(e: KeyboardEvent): void {
+    if (e.code === 'Escape') {
+      e.preventDefault();
+      if (this.state === GameState.PLAYING) {
+        this.pause();
+      } else if (this.state === GameState.PAUSED) {
+        this.resume();
+      }
+    }
+  }
+
   private loop = (time: number): void => {
     if (!this.running) return;
     this.animationFrameId = requestAnimationFrame(this.loop);
@@ -172,6 +216,11 @@ export class Game {
     if (this.state === GameState.PLAYING) {
       this.elapsed += delta;
       this.update(delta);
+    }
+
+    // Tick down game-over delay so restart isn't triggered instantly
+    if (this.state === GameState.GAME_OVER && this.gameOverDelay > 0) {
+      this.gameOverDelay -= delta;
     }
 
     // Always update environment (starfield animation even when paused/menu)
@@ -266,8 +315,15 @@ export class Game {
     }
   }
 
+  /** Whether the game-over screen is ready to accept restart input. */
+  public get canRestart(): boolean {
+    return this.state === GameState.GAME_OVER && this.gameOverDelay <= 0;
+  }
+
   public dispose(): void {
     this.stop();
+    document.removeEventListener('keydown', this.handleKeyDown);
+    this.pauseOverlay.remove();
     this.player.dispose();
     this.projectiles.dispose();
     this.asteroids.dispose();

@@ -44,7 +44,7 @@ export class GameOverScreen {
   }
 
   private restartGame(): void {
-    if (this.game.state !== GameState.GAME_OVER) return;
+    if (!this.game.canRestart) return;
     this.hide();
     this.game.restart();
   }
