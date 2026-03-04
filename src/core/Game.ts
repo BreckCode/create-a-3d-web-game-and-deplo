@@ -2,6 +2,7 @@ import { InputManager } from './InputManager';
 import { Player } from '../entities/Player';
 import { ProjectilePool } from '../entities/Projectile';
 import { AsteroidPool } from '../entities/Asteroid';
+import { EnemyPool } from '../entities/Enemy';
 import { SpawnSystem } from '../systems/SpawnSystem';
 import { CollisionSystem } from '../systems/CollisionSystem';
 import { Scene } from './Scene';
@@ -19,6 +20,7 @@ export class Game {
   public player: Player;
   public projectiles: ProjectilePool;
   public asteroids: AsteroidPool;
+  public enemies: EnemyPool;
   public spawnSystem: SpawnSystem;
   public collisionSystem: CollisionSystem;
   public state: GameState = GameState.MENU;
@@ -37,9 +39,15 @@ export class Game {
     this.scene.add(this.player.mesh);
     this.projectiles = new ProjectilePool(this.scene.scene);
     this.asteroids = new AsteroidPool(this.scene.scene);
+    this.enemies = new EnemyPool(this.scene.scene, this.projectiles);
     this.spawnSystem = new SpawnSystem(this.asteroids);
+    this.spawnSystem.setEnemyPool(this.enemies);
     this.collisionSystem = new CollisionSystem(this.player, this.projectiles, this.asteroids);
+    this.collisionSystem.setEnemyPool(this.enemies);
     this.collisionSystem.onAsteroidDestroyed = (scoreValue) => {
+      this.score += scoreValue;
+    };
+    this.collisionSystem.onEnemyDestroyed = (scoreValue) => {
       this.score += scoreValue;
     };
     this.highScore = this.loadHighScore();
@@ -89,6 +97,7 @@ export class Game {
     this.player.reset();
     this.projectiles.reset();
     this.asteroids.reset();
+    this.enemies.reset();
     this.spawnSystem.reset();
     this.start();
   }
@@ -128,6 +137,7 @@ export class Game {
     this.spawnSystem.update(delta, this.elapsed);
 
     this.asteroids.update(delta);
+    this.enemies.update(delta, this.player.position);
 
     // Collision detection
     this.collisionSystem.update();
@@ -159,6 +169,7 @@ export class Game {
     this.player.dispose();
     this.projectiles.dispose();
     this.asteroids.dispose();
+    this.enemies.dispose();
     this.input.dispose();
     this.scene.dispose();
   }
