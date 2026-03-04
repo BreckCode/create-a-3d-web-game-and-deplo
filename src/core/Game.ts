@@ -1,6 +1,8 @@
 import { InputManager } from './InputManager';
 import { Player } from '../entities/Player';
 import { ProjectilePool } from '../entities/Projectile';
+import { AsteroidPool } from '../entities/Asteroid';
+import { SPAWN } from '../utils/constants';
 import { Scene } from './Scene';
 
 export enum GameState {
@@ -15,6 +17,7 @@ export class Game {
   public input: InputManager;
   public player: Player;
   public projectiles: ProjectilePool;
+  public asteroids: AsteroidPool;
   public state: GameState = GameState.MENU;
   public score = 0;
   public highScore = 0;
@@ -23,6 +26,7 @@ export class Game {
   private lastTime = 0;
   private animationFrameId = 0;
   private running = false;
+  private asteroidSpawnTimer = 0;
 
   constructor(container: HTMLElement) {
     this.scene = new Scene(container);
@@ -30,6 +34,7 @@ export class Game {
     this.player = new Player();
     this.scene.add(this.player.mesh);
     this.projectiles = new ProjectilePool(this.scene.scene);
+    this.asteroids = new AsteroidPool(this.scene.scene);
     this.highScore = this.loadHighScore();
   }
 
@@ -76,6 +81,8 @@ export class Game {
     this.stop();
     this.player.reset();
     this.projectiles.reset();
+    this.asteroids.reset();
+    this.asteroidSpawnTimer = 0;
     this.start();
   }
 
@@ -110,6 +117,17 @@ export class Game {
 
     this.projectiles.update(delta);
 
+    // Spawn asteroids
+    this.asteroidSpawnTimer -= delta;
+    if (this.asteroidSpawnTimer <= 0) {
+      const difficulty = Math.min(this.elapsed / SPAWN.DIFFICULTY_RAMP_TIME, 1);
+      const interval = SPAWN.ASTEROID_INTERVAL - difficulty * (SPAWN.ASTEROID_INTERVAL - SPAWN.ASTEROID_MIN_INTERVAL);
+      this.asteroidSpawnTimer = interval;
+      this.asteroids.spawn();
+    }
+
+    this.asteroids.update(delta);
+
     if (!this.player.isAlive) {
       this.gameOver();
     }
@@ -136,6 +154,7 @@ export class Game {
     this.stop();
     this.player.dispose();
     this.projectiles.dispose();
+    this.asteroids.dispose();
     this.input.dispose();
     this.scene.dispose();
   }
