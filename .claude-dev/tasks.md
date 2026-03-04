@@ -15,7 +15,7 @@
 - [x] 13. Space environment | Create the background environment with starfield (particle system), scrolling nebula colors, ambient lighting, and depth fog | files: src/core/Scene.ts, src/core/AssetManager.ts
 - [x] 14. HUD overlay | Build the in-game heads-up display showing health bar, score, high score, active power-ups, and combo multiplier using HTML/CSS overlay | files: src/ui/HUD.ts, src/styles/main.css
 - [x] 15. Menu and game over screens | Create the title/start screen with game name and controls info, and game over screen with final score, high score, and restart button | files: src/ui/MenuScreen.ts, src/ui/GameOverScreen.ts, src/styles/main.css
-- [ ] 16. Audio system | Implement AudioManager with procedurally generated sound effects (shoot, explosion, pickup, hit) and ambient background music using Web Audio API | files: src/core/AudioManager.ts
+- [x] 16. Audio system | Implement AudioManager with procedurally generated sound effects (shoot, explosion, pickup, hit) and ambient background music using Web Audio API | files: src/core/AudioManager.ts
 - [ ] 17. Game state management | Wire up complete game flow: menu → playing → game over → restart, including pause functionality and state transitions | files: src/core/Game.ts
 - [ ] 18. Visual polish and effects | Add post-processing bloom/glow effects, screen shake on damage, flash effects on hits, smooth camera movements, and overall visual refinement | files: src/core/Scene.ts, src/core/Game.ts
 - [ ] 19. Performance optimization | Implement object pooling for all entities, frustum culling, efficient particle recycling, and ensure stable 60fps | files: src/core/Game.ts, src/entities/Projectile.ts, src/systems/ParticleSystem.ts

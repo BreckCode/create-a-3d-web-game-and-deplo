@@ -10,6 +10,7 @@ import { CollisionSystem } from '../systems/CollisionSystem';
 import { ParticleSystem } from '../systems/ParticleSystem';
 import { ScoreSystem } from '../systems/ScoreSystem';
 import { Scene } from './Scene';
+import { AudioManager } from './AudioManager';
 import { HUD } from '../ui/HUD';
 import { MenuScreen } from '../ui/MenuScreen';
 import { GameOverScreen } from '../ui/GameOverScreen';
@@ -35,6 +36,7 @@ export class Game {
   public particleSystem: ParticleSystem;
   public scoreSystem: ScoreSystem;
   public hud: HUD;
+  public audio: AudioManager;
   public menuScreen: MenuScreen;
   public gameOverScreen: GameOverScreen;
 
@@ -69,13 +71,16 @@ export class Game {
     this.collisionSystem.setEnemyPool(this.enemies);
     this.collisionSystem.setPowerUpPool(this.powerUps);
     this.scoreSystem = new ScoreSystem();
+    this.audio = new AudioManager();
     this.collisionSystem.onAsteroidDestroyed = (scoreValue, position) => {
       this.scoreSystem.addKillScore(scoreValue);
       this.particleSystem.explosion(position, COLORS.ASTEROID_BASE);
+      this.audio.explosion();
     };
     this.collisionSystem.onEnemyDestroyed = (scoreValue, position) => {
       this.scoreSystem.addKillScore(scoreValue);
       this.particleSystem.explosion(position, COLORS.ENEMY_HULL, 40);
+      this.audio.explosion();
     };
     this.collisionSystem.onPowerUpCollected = (type, position) => {
       this.applyPowerUp(type);
@@ -85,9 +90,11 @@ export class Game {
         HEALTH: COLORS.HEALTH,
       };
       this.particleSystem.pickup(position, colorMap[type] ?? 0xffffff);
+      this.audio.pickup();
     };
     this.collisionSystem.onPlayerHit = (position) => {
       this.particleSystem.explosion(position, COLORS.EXPLOSION, 15);
+      this.audio.hit();
     };
     this.collisionSystem.onProjectileImpact = (position, color) => {
       this.particleSystem.impact(position, color);
@@ -110,6 +117,7 @@ export class Game {
     this.state = GameState.PLAYING;
     this.scoreSystem.reset();
     this.elapsed = 0;
+    this.audio.startMusic();
     if (!this.running) this.startLoop();
   }
 
@@ -137,6 +145,7 @@ export class Game {
   public gameOver(): void {
     this.state = GameState.GAME_OVER;
     this.scoreSystem.finalizeScore();
+    this.audio.stopMusic();
   }
 
   public restart(): void {
@@ -185,6 +194,7 @@ export class Game {
         this.player.getForwardDirection(),
         'player',
       );
+      this.audio.shoot();
     }
 
     this.projectiles.update(delta);
@@ -264,6 +274,7 @@ export class Game {
     this.enemies.dispose();
     this.powerUps.dispose();
     this.particleSystem.dispose();
+    this.audio.dispose();
     this.hud.dispose();
     this.menuScreen.dispose();
     this.gameOverScreen.dispose();
